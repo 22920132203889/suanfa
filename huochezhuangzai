@@ -1,0 +1,72 @@
+#include<stdio.h>
+typedef struct GasStation
+{
+    float GasCapacity;
+    float DisFromLast;
+} GasStation;
+
+/**
+ *  算法:以尽可能少的趟数完成任务
+ *  初始条件:最后一个station肯定是在中点,即距离起始点500km
+ *  最后一个station储油的计算:
+ *  假设前一个储油点距离现在这个点x km,那么每走一趟(一来一回)能送500-2x
+ *  需求是能有500L以使车子能够开到终点,那么按照需求最少,假设只运一趟,即走3x,
+ *  那么3x+500为上一个station的理论储油量
+ *  又因为500-2x+500-x=500;   ==>   x=500/3,它小于250,说明是可行的,即只运输一次能够完成要求
+ *  最后一个station的实际储油量是
+ *  500-2x=500-1000/3=500/3
+ *  以这种分析方式直到符合所有要求
+ *
+ */
+
+void SetGasStation(GasStation *station,float *RequestOil);
+
+int main()
+{
+    GasStation station[32] ;
+    // 初始化
+    float RemainDistance = 500 ;
+
+    float RequestOil = 500 ;
+
+    int i = 0 ;
+
+    while(RemainDistance>0)
+    {
+        SetGasStation(&station[i],&RequestOil);
+
+        RemainDistance-=station[i].DisFromLast;
+
+        printf("%.3f   \t\t",station[i].GasCapacity);
+        printf("%.3f\n",station[i].DisFromLast);
+
+        i++;
+    }
+
+}
+
+void SetGasStation(GasStation *station,float *RequestOil)
+{
+    // 从初始的第一次开始进行尝试, 即初始化最小趟数认为是只放一次
+    int Times = 1 ;
+
+    float OnceDistance;
+
+    // 假设到前一个station的距离为X,即station.DisFromLast=x;
+    // 由于尝试的次数为t,那么储油量为(500-2x)*t+500-x=RequestOil
+    // x=R
+    // 求解x的值，如果x大于250,则为无效数据,将Times递增,继续循环做下去
+    OnceDistance = (500*Times+500-(*RequestOil))/(2*Times+1);
+
+    while(OnceDistance>=250 || OnceDistance<=0)
+    {
+        // 不合格数据
+        Times++;
+        OnceDistance = (500*Times+500-(*RequestOil))/(2*Times+1);
+    }
+
+    // 直到数据合格之后
+    (*station).DisFromLast = OnceDistance;
+    (*station).GasCapacity = (500 - 2*OnceDistance)*Times;
+    (*RequestOil) = 500 * Times + 500;
+}
