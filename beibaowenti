@@ -1,0 +1,64 @@
+#include <stdio.h> 
+#define N 100 //物品总种数不是常量，没法根据它来决定数组的长度，只有先定义个长度了 
+int n;//物品总种数 
+double limitW;//限制的总重量 
+double totV;//全部物品的总价值 
+double maxv;//解的总价值 
+double maxw=0.0;//解的总重量-------------->新加
+int option[N];//解的选择 
+int cop[N];//当前解的选择 
+struct {//物品结构 
+double weight; 
+double value; 
+}a[N]; 
+//参数为物品i,当前选择已经达到的重量和tw,本方案可能达到的总价值 
+void find(int i,double tw,double tv) 
+{ 
+int k; 
+//物品i包含在当前方案的可能性 
+if(tw+a[i].weight <= limitW){ 
+cop[i]=1; 
+if(i<n-1)find(i+1,tw+a[i].weight,tv); 
+else{ 
+for(k=0;k<n;++k) 
+option[k]=cop[k]; 
+maxv=tv; 
+} 
+} 
+cop[i]=0; 
+//物品i不包含在当前方案的可能性 
+if(tv-a[i].value>maxv){ 
+if(i<n-1)find(i+1,tw,tv-a[i].value); 
+else{ 
+for(k=0;k<n;++k) 
+option[k]=cop[k]; 
+maxv=tv-a[i].value; 
+} 
+} 
+} 
+void main() 
+{ 
+int k; 
+double w,v; 
+printf("输入物品种数:"); 
+scanf("%d",&n); 
+printf("输入各物品的重量和价值:"); 
+for(totV=0.0,k=0;k<n;++k){ 
+scanf("%lf %lf",&w,&v); 
+a[k].weight = w;a[k].value = v; 
+totV += v; 
+} 
+printf("输入限制重量:"); 
+scanf("%lf",&limitW); 
+maxv=0.0; 
+for(k=0;k<n;++k)cop[k]=0; 
+find(0,0.0,totV); 
+for(k=0;k<n;++k) 
+if(option[k])
+{//-------------->新加
+maxw+=a[k].weight//-------------->新加
+printf("%4d",k+1); 
+}//-------------->新加
+printf("总价值为: %2f",maxv); 
+printf("总重量为: %2f",maxw); //-------------->新加
+}
